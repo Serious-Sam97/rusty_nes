@@ -1,3 +1,12 @@
+pub mod cpu;
+pub mod memory;
+
+use cpu::CPU;
+use memory:: Memory;
+
 fn main() {
-    println!("Hello, world!");
+    let memory = Memory::new();
+    let mut cpu = CPU::new();
+
+    cpu.reset(&memory);
 }
