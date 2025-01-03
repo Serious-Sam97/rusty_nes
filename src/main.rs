@@ -4,7 +4,6 @@ pub mod opcodes;
 
 use cpu::CPU;
 use memory::Memory;
-use opcodes;
 
 fn main() {
     let memory = Memory::new();

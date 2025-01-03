@@ -1,5 +1,6 @@
 use crate::memory::Memory;
-use crate::opcodes::{build_opcode_table, AddressingMode};
+use crate::opcodes::build_opcode_table;
+pub use crate::opcodes::AddressingMode;
 
 pub struct CPU {
     pub a: u8, //Accumulator
@@ -92,7 +93,7 @@ impl CPU {
         self.pc += 1; // Increment PC to the next byte
 
         let opcode_table = build_opcode_table(); // Fetch opcode table
-        if let Some(opcode_data) = opcode_table[opcode as usize] {
+        if let Some(opcode_data) = &opcode_table[opcode as usize] {
             match opcode_data.name {
                 "LDA" => self.lda(memory, &opcode_data.addressing_mode),
                 "STA" => self.sta(memory, &opcode_data.addressing_mode),

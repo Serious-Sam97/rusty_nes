@@ -1,11 +1,11 @@
-use crate::cpu::AddressingMode;
-
+#[derive(Clone)]
 pub struct Opcode {
     pub name: &'static str,
     pub cycles: u8,
     pub addressing_mode: AddressingMode,
 }
 
+#[derive(Clone)]
 pub enum AddressingMode {
     Immediate,
     ZeroPage,
@@ -24,7 +24,7 @@ pub enum AddressingMode {
 }
 
 pub fn build_opcode_table() -> [Option<Opcode>; 256] {
-    let mut table: [Option<Opcode>; 256] = [None; 256];
+    let mut table: [Option<Opcode>; 256] = [(); 256].map(|_| None);
 
     // ADC - Add with Carry
     table[0x69] = Some(Opcode { name: "ADC", cycles: 2, addressing_mode: AddressingMode::Immediate });
