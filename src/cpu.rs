@@ -134,6 +134,14 @@ impl CPU {
                 "NOP" => self.nop(),
                 "BRK" => self.brk(memory),
                 "RTI" => self.rti(memory),
+                "LAX" => self.lax(memory, &opcode_data.addressing_mode),
+                "SAX" => self.sax(memory, &opcode_data.addressing_mode),
+                "DCP" => self.dcp(memory, &opcode_data.addressing_mode),
+                "ISC" => self.isc(memory, &opcode_data.addressing_mode),
+                "SLO" => self.slo(memory, &opcode_data.addressing_mode),
+                "SRE" => self.sre(memory, &opcode_data.addressing_mode),
+                "RLA" => self.rla(memory, &opcode_data.addressing_mode),
+                "RRA" => self.rra(memory, &opcode_data.addressing_mode),
                 // Add cases for other opcodes
                 _ => panic!("Unimplemented opcode: {}", opcode_data.name),
             }
@@ -427,6 +435,109 @@ impl CPU {
         self.sp = self.sp.wrapping_add(1);
         let high_byte = memory.read(0x0100 + self.sp as u16) as u16;
         self.pc = (high_byte << 8) | low_byte;
+    }
+
+    fn lax(&mut self, memory: &Memory, mode: &AddressingMode) {
+        let addr = self.get_operand_address(memory, mode);
+        let value = memory.read(addr);
+        self.a = value;
+        self.x = value;
+        self.set_zero_and_negative_flags(self.a);
+    }
+
+    fn sax(&mut self, memory: &mut Memory, mode: &AddressingMode) {
+        let addr = self.get_operand_address(memory, mode);
+        let value = self.a & self.x;
+        memory.write(addr, value);
+    }
+
+    fn dcp(&mut self, memory: &mut Memory, mode: &AddressingMode) {
+        let addr = self.get_operand_address(memory, mode);
+        let mut value = memory.read(addr);
+        value = value.wrapping_sub(1);
+        memory.write(addr, value);
+
+        // Perform comparison with A (same logic as CMP)
+        let result = self.a.wrapping_sub(value);
+        self.set_zero_and_negative_flags(result);
+        if self.a >= value {
+            self.p |= 0x01; // Set carry flag
+        } else {
+            self.p &= !0x01; // Clear carry flag
+        }
+    }
+
+    fn isc(&mut self, memory: &mut Memory, mode: &AddressingMode) {
+        let addr = self.get_operand_address(memory, mode);
+        let mut value = memory.read(addr);
+        value = value.wrapping_add(1);
+        memory.write(addr, value);
+
+        // Perform subtraction with carry (same logic as SBC)
+        let carry = self.p & 0x01;
+        let result = self.a as u16 + (!value as u16) + carry as u16;
+        self.a = result as u8;
+        self.set_zero_and_negative_flags(self.a);
+
+        if result > 0xFF {
+            self.p |= 0x01; // Set carry flag
+        } else {
+            self.p &= !0x01; // Clear carry flag
+        }
+    }
+
+    fn slo(&mut self, memory: &mut Memory, mode: &AddressingMode) {
+        let addr = self.get_operand_address(memory, mode);
+        let mut value = memory.read(addr);
+        self.p = (self.p & !0x01) | (value >> 7); // Set carry flag to high bit
+        value <<= 1;
+        memory.write(addr, value);
+
+        self.a |= value;
+        self.set_zero_and_negative_flags(self.a);
+    }
+
+    fn sre(&mut self, memory: &mut Memory, mode: &AddressingMode) {
+        let addr = self.get_operand_address(memory, mode);
+        let mut value = memory.read(addr);
+        self.p = (self.p & !0x01) | (value & 0x01); // Set carry flag to low bit
+        value >>= 1;
+        memory.write(addr, value);
+
+        self.a ^= value;
+        self.set_zero_and_negative_flags(self.a);
+    }
+
+    fn rla(&mut self, memory: &mut Memory, mode: &AddressingMode) {
+        let addr = self.get_operand_address(memory, mode);
+        let mut value = memory.read(addr);
+        let carry_in = self.p & 0x01;
+        self.p = (self.p & !0x01) | (value >> 7); // Set carry flag to high bit
+        value = (value << 1) | carry_in;
+        memory.write(addr, value);
+
+        self.a &= value;
+        self.set_zero_and_negative_flags(self.a);
+    }
+
+    fn rra(&mut self, memory: &mut Memory, mode: &AddressingMode) {
+        let addr = self.get_operand_address(memory, mode);
+        let mut value = memory.read(addr);
+        let carry_in = (self.p & 0x01) << 7;
+        self.p = (self.p & !0x01) | (value & 0x01); // Set carry flag to low bit
+        value = (value >> 1) | carry_in;
+        memory.write(addr, value);
+
+        let carry = self.p & 0x01;
+        let result = self.a as u16 + value as u16 + carry as u16;
+        self.a = result as u8;
+        self.set_zero_and_negative_flags(self.a);
+
+        if result > 0xFF {
+            self.p |= 0x01; // Set carry flag
+        } else {
+            self.p &= !0x01; // Clear carry flag
+        }
     }
 
 }
