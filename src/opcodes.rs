@@ -293,7 +293,37 @@ pub fn build_opcode_table() -> [Option<Opcode>; 256] {
 
 
     //UNNOFFICIAL OPCODES
+    // LAX - Load Accumulator and X
+    table[0xA7] = Some(Opcode { name: "LAX", cycles: 3, addressing_mode: AddressingMode::ZeroPage });
+    table[0xB7] = Some(Opcode { name: "LAX", cycles: 4, addressing_mode: AddressingMode::ZeroPageY });
+    table[0xAF] = Some(Opcode { name: "LAX", cycles: 4, addressing_mode: AddressingMode::Absolute });
+    table[0xBF] = Some(Opcode { name: "LAX", cycles: 4, addressing_mode: AddressingMode::AbsoluteY });
+    table[0xA3] = Some(Opcode { name: "LAX", cycles: 6, addressing_mode: AddressingMode::IndexedIndirect });
+    table[0xB3] = Some(Opcode { name: "LAX", cycles: 5, addressing_mode: AddressingMode::IndirectIndexed });
 
+    // SAX - Store A & X
+    table[0x87] = Some(Opcode { name: "SAX", cycles: 3, addressing_mode: AddressingMode::ZeroPage });
+    table[0x97] = Some(Opcode { name: "SAX", cycles: 4, addressing_mode: AddressingMode::ZeroPageY });
+    table[0x8F] = Some(Opcode { name: "SAX", cycles: 4, addressing_mode: AddressingMode::Absolute });
+    table[0x83] = Some(Opcode { name: "SAX", cycles: 6, addressing_mode: AddressingMode::IndexedIndirect });
+
+    // DCP - Decrement Memory and Compare
+    table[0xC7] = Some(Opcode { name: "DCP", cycles: 5, addressing_mode: AddressingMode::ZeroPage });
+    table[0xD7] = Some(Opcode { name: "DCP", cycles: 6, addressing_mode: AddressingMode::ZeroPageX });
+    table[0xCF] = Some(Opcode { name: "DCP", cycles: 6, addressing_mode: AddressingMode::Absolute });
+    table[0xDF] = Some(Opcode { name: "DCP", cycles: 7, addressing_mode: AddressingMode::AbsoluteX });
+    table[0xDB] = Some(Opcode { name: "DCP", cycles: 7, addressing_mode: AddressingMode::AbsoluteY });
+    table[0xD3] = Some(Opcode { name: "DCP", cycles: 8, addressing_mode: AddressingMode::IndirectIndexed });
+    table[0xC3] = Some(Opcode { name: "DCP", cycles: 8, addressing_mode: AddressingMode::IndexedIndirect });
+
+    // ISC - Increment Memory and Subtract with Carry
+    table[0xE7] = Some(Opcode { name: "ISC", cycles: 5, addressing_mode: AddressingMode::ZeroPage });
+    table[0xF7] = Some(Opcode { name: "ISC", cycles: 6, addressing_mode: AddressingMode::ZeroPageX });
+    table[0xEF] = Some(Opcode { name: "ISC", cycles: 6, addressing_mode: AddressingMode::Absolute });
+    table[0xFF] = Some(Opcode { name: "ISC", cycles: 7, addressing_mode: AddressingMode::AbsoluteX });
+    table[0xFB] = Some(Opcode { name: "ISC", cycles: 7, addressing_mode: AddressingMode::AbsoluteY });
+    table[0xF3] = Some(Opcode { name: "ISC", cycles: 8, addressing_mode: AddressingMode::IndirectIndexed });
+    table[0xE3] = Some(Opcode { name: "ISC", cycles: 8, addressing_mode: AddressingMode::IndexedIndirect });
 
     table
 }
